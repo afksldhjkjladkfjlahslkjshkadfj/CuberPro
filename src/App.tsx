@@ -287,9 +287,26 @@ export default function App() {
         const savedProfile = localStorage.getItem('guest_user_profile');
         if (savedProfile) {
           try {
-            setUserProfile(JSON.parse(savedProfile));
+            const parsed = JSON.parse(savedProfile);
+            parsed.uid = 'guest'; // Safely force local guest profile to have guest uid!
+            setUserProfile(parsed);
           } catch (e) {
             console.error('Failed to parse guest user profile:', e);
+            setUserProfile({
+              uid: 'guest',
+              displayName: 'Guest Cuber',
+              email: '',
+              streak: 0,
+              longestStreak: 0,
+              lastActive: new Date().toISOString() as any,
+              currentGoal: 'ZBLL',
+              accuracyRate: 100,
+              totalReviews: 0,
+              badges: [],
+              createdAt: new Date().toISOString() as any,
+              learningQueue: [],
+              dailyAlgState: undefined
+            });
           }
         } else {
           setUserProfile({
@@ -386,7 +403,11 @@ export default function App() {
         await setDoc(userDocRef, newProfile);
         setUserProfile(newProfile);
       } else {
-        setUserProfile(docSnap.data() as UserProfile);
+        const data = docSnap.data() as UserProfile;
+        setUserProfile({
+          ...data,
+          uid: data.uid || user.uid
+        });
       }
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `users/${user.uid}`);
@@ -399,6 +420,37 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
+      // Disconnect live snapshot listeners immediately by nullifying currentUser in local state
+      setCurrentUser(null);
+
+      // Clean up local storage guest profiles to avoid stale uid values
+      const savedProfile = localStorage.getItem('guest_user_profile');
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          parsed.uid = 'guest';
+          localStorage.setItem('guest_user_profile', JSON.stringify(parsed));
+        } catch (e) {}
+      }
+      
+      // Update local state immediately to guest to avoid flashing
+      setUserProfile({
+        uid: 'guest',
+        displayName: 'Guest Cuber',
+        email: '',
+        streak: 0,
+        longestStreak: 0,
+        lastActive: new Date().toISOString() as any,
+        currentGoal: 'ZBLL',
+        accuracyRate: 100,
+        totalReviews: 0,
+        badges: [],
+        createdAt: new Date().toISOString() as any,
+        learningQueue: [],
+        dailyAlgState: undefined
+      });
+      setUserProgress({});
+      
       await signOut(auth);
     } catch (err) {
       console.error('Logout error:', err);

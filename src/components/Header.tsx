@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Stats / Profile info */}
       <div className="flex items-center gap-6">
-        {userProfile ? (
+        {userProfile && userProfile.uid !== 'guest' && userProfile.email ? (
           <div className="flex items-center gap-4">
             {/* Streak Indicator */}
             <div className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full text-orange-400">
@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
         ) : (
           <button
             onClick={onLogin}
-            className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-full text-xs font-semibold transition-all"
+            className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-full text-xs font-semibold transition-all cursor-pointer"
             id="header-login-btn"
           >
             <LogIn className="w-3.5 h-3.5" />

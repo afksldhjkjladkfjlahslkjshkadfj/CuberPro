@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldAlert, Zap, Globe, User, RefreshCw } from 'lucide-react';
+import { X, ShieldAlert, Zap, Globe, User, RefreshCw, ExternalLink } from 'lucide-react';
 import { signInWithPopup, signInAnonymously, auth, googleProvider } from '../lib/firebase';
 
 interface LoginModalProps {
@@ -139,15 +139,28 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Social login buttons */}
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
-            id="google-login-btn"
-          >
-            <Globe className="w-4 h-4" />
-            Sign In with Google Account
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
+              id="google-login-btn"
+            >
+              <Globe className="w-4 h-4" />
+              Sign In with Google Account
+            </button>
+
+            {window.self !== window.top && (
+              <button
+                onClick={() => window.open(window.location.href, '_blank')}
+                className="w-full py-2 bg-indigo-950/40 hover:bg-indigo-900/40 border border-indigo-900/30 text-indigo-400 hover:text-indigo-300 rounded-xl text-[11px] font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
+                id="open-new-tab-login-btn"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Open App in New Tab to Sign In
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Footer info banner */}

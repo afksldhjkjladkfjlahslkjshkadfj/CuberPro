@@ -46,10 +46,23 @@ export const Settings: React.FC<SettingsProps> = ({
   const scriptableCode = `// iOS Scriptable Widget for CuberPro
 const url = "${userProfile ? widgetUrl : 'https://cuberpro-url/api/widget?userId=YOUR_ID'}";
 const request = new Request(url);
-const data = await request.loadJSON();
+let responseString = "";
+
+try {
+  responseString = await request.loadString();
+} catch (e) {
+  throw new Error("Network error: Make sure your device can reach the server. (" + e.message + ")");
+}
+
+let data;
+try {
+  data = JSON.parse(responseString);
+} catch (e) {
+  throw new Error("Server response is not valid JSON. Response preview: " + responseString.substring(0, 100));
+}
 
 if (!data || !data.success) {
-  throw new Error("Unable to load statistics");
+  throw new Error("API returned failure: " + (data ? data.error : "Unknown error"));
 }
 
 let widget = new ListWidget();
@@ -87,7 +100,7 @@ let caseHeader = widget.addText("TODAY'S CHALLENGE:");
 caseHeader.textColor = new Color("#475569");
 caseHeader.font = Font.boldSystemFont(8);
 
-let caseName = widget.addText(data.todayAlgorithm.name);
+let caseName = widget.addText(data.todayAlgorithm ? data.todayAlgorithm.name : "None");
 caseName.textColor = Color.white();
 caseName.font = Font.boldSystemFont(11);
 
@@ -186,6 +199,21 @@ widget.presentSmall();`;
                 </h3>
                 <p className="text-slate-500 text-[11px] mt-1">Integrate CuberPro stats into your iOS device using Scriptable.</p>
               </div>
+            </div>
+
+            {/* Sandbox Security Notice */}
+            <div className="bg-indigo-950/20 border border-indigo-900/40 rounded-xl p-3.5 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-indigo-400">
+                <Info className="w-4 h-4 shrink-0" />
+                Sandbox Environment Notice
+              </div>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                The AI Studio developer sandbox environment is secure and requires active Google session authentication to view any URL. 
+                Because external iOS apps (like Scriptable) do not carry your Google account login cookies, they will be redirected to the Google accounts login page (resulting in a <span className="font-mono text-red-400">JSON parse error</span> or redirection to <span className="font-mono text-red-400">accounts.google.com</span>).
+              </p>
+              <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                🚀 <span className="text-slate-300">How to run it:</span> This setup is fully ready! Once you export the code or deploy CuberPro to your own public host (e.g. without development proxy gates), this widget will authenticate and load your stats immediately!
+              </p>
             </div>
 
             {/* Widget URL */}

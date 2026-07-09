@@ -1,8 +1,9 @@
 import React from 'react';
-import { Flame, Compass, Play, BookOpen, AlertCircle, ArrowRight, Award, Plus, CheckCircle2 } from 'lucide-react';
+import { Flame, Compass, Play, BookOpen, AlertCircle, ArrowRight, Award, Plus, CheckCircle2, ExternalLink } from 'lucide-react';
 import { AlgorithmCase, ALGORITHM_LIBRARY } from '../data/algorithms';
 import { UserProgressDoc, UserProfile, BADGES } from '../types';
 import { CubeVisualizer } from './CubeVisualizer';
+import { getSpeedCubeDBUrl } from '../utils/srs';
 
 interface DashboardProps {
   userProfile: UserProfile | null;
@@ -149,6 +150,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   )}
                 </>
               )}
+              <a 
+                href={getSpeedCubeDBUrl(dailyAlgorithm)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl font-bold text-xs transition-all border border-slate-800 hover:text-white cursor-pointer"
+                id="daily-speedcubedb-btn"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                SpeedCubeDB
+              </a>
             </div>
           </div>
         </div>

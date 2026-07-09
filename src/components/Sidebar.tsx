@@ -66,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* User Footer Account Module */}
       <div className="p-4 border-t border-slate-800 bg-[#08080a]">
-        {userProfile ? (
+        {userProfile && userProfile.uid !== 'guest' && userProfile.email ? (
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
               <div className="w-9 h-9 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-sm select-none">
@@ -82,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <button
               onClick={onLogout}
-              className="w-full flex items-center justify-center gap-2 py-1.5 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white rounded-lg text-xs font-semibold transition-all"
+              className="w-full flex items-center justify-center gap-2 py-1.5 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white rounded-lg text-xs font-semibold transition-all cursor-pointer"
               id="sidebar-logout"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -91,10 +91,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ) : (
           <div className="text-center p-2">
+            {userProfile && (userProfile.uid === 'guest' || !userProfile.email) && (
+              <div className="flex items-center gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800 mb-3 text-left">
+                <div className="w-9 h-9 rounded-full bg-slate-500/20 border border-slate-800 flex items-center justify-center text-slate-400 font-bold text-sm select-none">
+                  GC
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-xs font-semibold text-white truncate">Guest Cuber</p>
+                  <p className="text-[10px] text-slate-500">Local progress only</p>
+                </div>
+              </div>
+            )}
             <p className="text-xs text-slate-500 mb-3">Master algorithms with persistent cloud syncing.</p>
             <button
               onClick={onLogin}
-              className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20"
+              className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
               id="sidebar-login"
             >
               Sign In with Google
