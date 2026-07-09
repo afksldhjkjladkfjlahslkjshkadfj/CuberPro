@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile, streaks, and global progress statistics",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique Firebase user ID" },
+        "displayName": { "type": "string", "description": "Display name of the user" },
+        "email": { "type": "string", "description": "Email address" },
+        "streak": { "type": "integer", "description": "Current active daily streak" },
+        "longestStreak": { "type": "integer", "description": "All-time longest streak" },
+        "lastActive": { "type": "string", "format": "date-time", "description": "Last active timestamp" },
+        "currentGoal": { "type": "string", "description": "Current target algorithm subset to learn" },
+        "accuracyRate": { "type": "number", "description": "Overall accuracy rate in reviews" },
+        "totalReviews": { "type": "integer", "description": "Total reviews completed" },
+        "badges": { "type": "array", "description": "Earned badging codes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "User creation date" }
+      },
+      "required": ["uid"]
+    },
+    "UserProgress": {
+      "title": "UserProgress",
+      "description": "Spaced repetition status, preferred override algorithms, and user notes for a specific case",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Associated user ID" },
+        "caseId": { "type": "string", "description": "Unique identifier of the case within subset" },
+        "puzzle": { "type": "string", "description": "Puzzle identifier, e.g., 3x3" },
+        "subset": { "type": "string", "description": "Algorithm subset, e.g., PLL" },
+        "status": { "type": "string", "description": "Current learning status (unlearned, learning, mastered)" },
+        "preferredAlg": { "type": "string", "description": "User's customized/preferred algorithm (overrides library default)" },
+        "notes": { "type": "string", "description": "User's custom notes and fingering tips" },
+        "isFavorite": { "type": "boolean", "description": "Whether favorited by user" },
+        "interval": { "type": "integer", "description": "SRS interval in days" },
+        "easeFactor": { "type": "number", "description": "SRS ease factor" },
+        "repetitions": { "type": "integer", "description": "Number of correct reviews in a row" },
+        "lastReviewed": { "type": "string", "format": "date-time", "description": "Last review timestamp" },
+        "nextReview": { "type": "string", "format": "date-time", "description": "Next scheduled review timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["userId", "caseId", "puzzle", "subset", "status"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "user_progress/{progressId}": {
+      "schema": "UserProgress",
+      "description": "User learning progress, custom notes, and SRS states for each algorithm case"
+    }
+  }
+}

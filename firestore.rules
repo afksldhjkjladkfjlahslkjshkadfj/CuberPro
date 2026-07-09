@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Helper to validate User Profile shape
+    function isValidUser(data) {
+      return data.get('uid', null) is string 
+        && data.uid == request.auth.uid
+        && (data.get('displayName', null) == null || (data.displayName is string && data.displayName.size() <= 100))
+        && (data.get('email', null) == null || (data.email is string && data.email.size() <= 200))
+        && (data.get('streak', null) == null || data.streak is int)
+        && (data.get('longestStreak', null) == null || data.longestStreak is int)
+        && (data.get('currentGoal', null) == null || (data.currentGoal is string && data.currentGoal.size() <= 50))
+        && (data.get('totalReviews', null) == null || data.totalReviews is int)
+        && (data.get('accuracyRate', null) == null || data.accuracyRate is float || data.accuracyRate is int)
+        && (data.get('badges', null) == null || data.badges is list)
+        && (data.get('lastActive', null) == null || data.lastActive is timestamp || data.lastActive is string)
+        && (data.get('learningQueue', null) == null || data.learningQueue is list)
+        && (data.get('dailyAlgState', null) == null || data.dailyAlgState is map)
+        && (data.get('createdAt', null) == null || data.createdAt is timestamp || data.createdAt is string);
+    }
+
+    // Helper to validate UserProgress shape
+    function isValidUserProgress(data) {
+      return data.userId is string
+        && data.userId == request.auth.uid
+        && data.caseId is string && data.caseId.size() <= 100
+        && data.puzzle is string && data.puzzle.size() <= 50
+        && data.subset is string && data.subset.size() <= 50
+        && data.status is string && data.status.size() <= 30
+        && (data.get('preferredAlg', null) == null || (data.preferredAlg is string && data.preferredAlg.size() <= 200))
+        && (data.get('notes', null) == null || (data.notes is string && data.notes.size() <= 2000))
+        && (data.get('isFavorite', null) == null || data.isFavorite is bool)
+        && (data.get('interval', null) == null || data.interval is int)
+        && (data.get('easeFactor', null) == null || data.easeFactor is float || data.easeFactor is int)
+        && (data.get('repetitions', null) == null || data.repetitions is int)
+        && (data.get('lastReviewed', null) == null || data.lastReviewed is timestamp || data.lastReviewed is string)
+        && (data.get('nextReview', null) == null || data.nextReview is timestamp || data.nextReview is string)
+        && (data.get('updatedAt', null) == null || data.updatedAt is timestamp || data.updatedAt is string);
+    }
+
+    // Rules for users collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && (incoming().get('createdAt', null) == null || incoming().createdAt == request.time);
+      allow update: if isOwner(userId) && isValidUser(incoming()) 
+        && (incoming().get('createdAt', null) == existing().get('createdAt', null))
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'streak', 'longestStreak', 'lastActive', 'currentGoal', 'accuracyRate', 'totalReviews', 'badges', 'learningQueue', 'dailyAlgState']);
+    }
+
+    // Rules for user_progress collection
+    match /user_progress/{progressId} {
+      allow get, delete: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidUserProgress(incoming()) && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidUserProgress(incoming()) && incoming().updatedAt == request.time;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Speedcubing Algorithm Learning Platform",
+  "description": "An interactive, full-stack, spaced-repetition algorithm learning, review, and timed practice studio for speedcubers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
